@@ -28,17 +28,7 @@ def generate_options_keyboard(answer_options, right_answer):
     builder.adjust(1)
     return builder.as_markup()
 
-
-@DP.callback_query(F.data == "right_answer")
-async def right_answer(callback: types.CallbackQuery):
-
-    await callback.bot.edit_message_reply_markup(
-        chat_id=callback.from_user.id,
-        message_id=callback.message.message_id,
-        reply_markup=None
-    )
-
-    await callback.message.answer("Верно!")
+async def get_next_question(callback: types.CallbackQuery):
     current_question_index = await get_quiz_index(callback.from_user.id)
     # Обновление номера текущего вопроса в базе данных
     current_question_index += 1
@@ -49,6 +39,19 @@ async def right_answer(callback: types.CallbackQuery):
         await get_question(callback.message, callback.from_user.id)
     else:
         await callback.message.answer("Это был последний вопрос. Квиз завершен!")
+
+
+
+@DP.callback_query(F.data == "right_answer")
+async def right_answer(callback: types.CallbackQuery):
+
+    await callback.bot.edit_message_reply_markup(
+        chat_id=callback.from_user.id,
+        message_id=callback.message.message_id,
+        reply_markup=None
+    )
+    await callback.message.answer("Верно!")
+    await get_next_question(callback)
 
 
 @DP.callback_query(F.data == "wrong_answer")
@@ -64,16 +67,7 @@ async def wrong_answer(callback: types.CallbackQuery):
     correct_option = quiz_data[current_question_index]['correct_option']
 
     await callback.message.answer(f"Неправильно. Правильный ответ: {quiz_data[current_question_index]['options'][correct_option]}")
-
-    # Обновление номера текущего вопроса в базе данных
-    current_question_index += 1
-    await update_quiz_index(callback.from_user.id, current_question_index)
-
-
-    if current_question_index < len(quiz_data):
-        await get_question(callback.message, callback.from_user.id)
-    else:
-        await callback.message.answer("Это был последний вопрос. Квиз завершен!")
+    await get_next_question(callback)
 
 
 # Хэндлер на команду /start

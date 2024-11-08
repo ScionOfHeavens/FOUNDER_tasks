@@ -1,6 +1,6 @@
 import aiosqlite
 
-from Cobstants import DB_NAME
+from Constants import DB_NAME
 
 async def get_quiz_index(user_id):
      # Подключаемся к базе данных
