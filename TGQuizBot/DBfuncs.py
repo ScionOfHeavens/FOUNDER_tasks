@@ -1,6 +1,6 @@
 import aiosqlite
 
-from Constants import DB_NAME
+from TGQuizBot.Constants import DB_NAME
 
 async def get_quiz_index(user_id):
      # Подключаемся к базе данных
